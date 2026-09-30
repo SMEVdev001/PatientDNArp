@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ค้นหาสไตล์รอยยิ้มของคุณ - Smile Everyday Dental Clinic</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #000000;
+            --accent-color: #FFD000;
+            --bg-color: #F2F2F2;
+            --card-bg: #FFFFFF;
+            --text-color: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 650px;
+            padding: 35px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        h1, h2 { color: var(--primary-color); }
+        .option-label {
+            display: flex; align-items: flex-start; gap: 12px; background: var(--bg-color);
+            padding: 15px; border-radius: 8px; cursor: pointer; font-size: 15px; margin-bottom: 12px; transition: background 0.2s; text-align: left;
+        }
+        .option-label:hover { background: #e0e0e0; }
+        .btn-submit {
+            background-color: var(--accent-color); color: var(--primary-color); border: none;
+            padding: 14px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; font-weight: bold;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+        .hidden { display: none !important; }
+        
+        .animal-hero-box {
+            padding: 10px 0;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .character-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 220px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .score-display {
+            font-size: 15px; margin: 15px 0; background: var(--bg-color);
+            padding: 20px; border-radius: 12px; text-align: left; line-height: 1.7;
+        }
+        .input-box {
+            width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; text-align: left;
+        }
+        .voucher-box {
+            background: #fff8e1; border: 2px dashed #FFD000; padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; color: #b78103;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <!-- หน้าแรก: ลงทะเบียนรับสิทธิ์ -->
+    <div id="welcome-section">
+        <h1>🦷 ค้นหาสไตล์รอยยิ้มของคุณ</h1>
+        <p style="color: #666; line-height: 1.6;">ทำแบบทดสอบสั้นๆ 5 ข้อ เพื่อค้นหา DNA รอยยิ้มที่ใช่ พร้อมรับสิทธิ์รับของที่ระลึกฟรีที่หน้าคลินิก!</p>
+        
+        <div style="margin-top: 25px; text-align: left;">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px;">ชื่อเล่นของคุณ:</label>
+            <input type="text" id="user-name" class="input-box" placeholder="เช่น คุณมินท์, คุณป๊อป..." autocomplete="off">
+            
+            <label style="font-weight: bold; display: block; margin-bottom: 8px;">เบอร์โทรศัพท์ (สำหรับยืนยันรับของรางวัล):</label>
+            <input type="tel" id="user-phone" class="input-box" placeholder="0812345678" maxlength="10" autocomplete="off">
+        </div>
+
+        <button class="btn-submit" onclick="startQuiz()">เริ่มค้นหาสไตล์รอยยิ้ม 🚀</button>
+    </div>
+
+    <!-- หน้าทำแบบทดสอบ (5 ข้อ) -->
+    <div id="quiz-section" class="hidden">
+        <h2 id="quiz-title"></h2>
+        <div id="progress-bar" style="background: #ddd; height: 6px; border-radius: 3px; margin-bottom: 20px;">
+            <div id="progress-fill" style="background: var(--accent-color); height: 100%; width: 0%; border-radius: 3px; transition: width 0.3s;"></div>
+        </div>
+        <div id="question-container" style="text-align: left;"></div>
+        <button class="btn-submit" onclick="nextQuestion()">เลือกข้อนี้แล้วไปต่อ</button>
+    </div>
+
+    <!-- หน้าแสดงผลลัพธ์ -->
+    <div id="result-section" class="hidden">
+        <h2>🎉 สไตล์รอยยิ้มของคุณคือ</h2>
+        
+        <div class="animal-hero-box">
+            <img id="hero-image" class="character-img" src="" alt="Smile Character">
+            <div id="hero-title" style="font-size: 22px; font-weight: bold; color: var(--primary-color);"></div>
+            <div id="hero-sub" style="font-size: 15px; color: #555; margin-top: 8px; line-height: 1.5;"></div>
+        </div>
+
+        <div class="result-box">
+            <div class="score-display" id="score-text"></div>
+            
+            <div class="voucher-box">
+                🎁 แคปหน้าจอนี้ หรือแจ้งชื่อ-เบอร์โทร กับพี่ๆ เคาน์เตอร์<br>เพื่อรับของที่ระลึกฟรีทันที!
+            </div>
+
+            <button class="btn-submit" style="background-color: #333; color: #fff; margin-top: 15px;" onclick="location.reload()">ทำใหม่อีกครั้ง</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVE2xUrFBId0BiGSspZKYbUYxCzWFarobRfDKeZAkdPpbt22m4VCEComZfS7mkahKe/exec";
+
+    // 🔗 รูปภาพคาแรคเตอร์สัตว์ 4 ทิศ
+    const IMAGE_LINKS = {
+        "Bull_Bear": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBullBear.png",
+        "Bear_Bull": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBullBear.png",
+        "Bull_Mouse": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBullEleph.png",
+        "Mouse_Bull": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBullEleph.png",
+        "Bull_Eagle": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBullEagle.png",
+        "Eagle_Bull": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBullEagle.png",
+        "Bear_Mouse": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBearEleph.png",
+        "Mouse_Bear": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBearEleph.png",
+        "Bear_Eagle": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBearEagle.png",
+        "Eagle_Bear": "https://smevdental.com/wp-content/uploads/2026/09/SMEVBearEagle.png",
+        "Mouse_Eagle": "https://smevdental.com/wp-content/uploads/2026/09/SMEVEagleEleph.png",
+        "Eagle_Mouse": "https://smevdental.com/wp-content/uploads/2026/09/SMEVEagleEleph.png"
+    };
+
+    // 📋 ชุดคำถามสำหรับคนไข้ (ซ่อนรหัส B.A.N.K. ไว้ในตัวเลือก: [0=กระทิง/Action, 1=หมี/Blueprint, 2=ช้าง/Nurturing, 3=อินทรี/Knowledge])
+    const patientQuestions = [
+        {
+            q: "สิ่งที่คุณให้ความสำคัญที่สุด เวลาตัดสินใจเลือกคลินิกทันตกรรมสักแห่ง คืออะไร?",
+            o: [
+                "สะดวกรวดเร็ว คิวไม่รอนาน บริการฉับไว คุ้มค่าเงินที่สุด",
+                "คลินิกสะอาดได้มาตรฐาน ปลอดภัย มั่นใจในความเป๊ะ",
+                "บรรยากาศอบอุ่น หมอและทีมงานใจดี คอยดูแลเอาใจใส่เหมือนครอบครัว",
+                "เทคโนโลยีทันสมัย คุณหมอมีความเชี่ยวชาญ และมีรีวิวเคสที่น่าเชื่อถือ"
+            ]
+        },
+        {
+            q: "เวลาได้ยินเสียงเครื่องมือหรือเสียงกรอในห้องฟัน ความรู้สึกแรกของคุณคือ...",
+            o: [
+                "เฉยๆ รีบทำรีบเสร็จ จะได้ไปทำธุระอย่างอื่นต่อ",
+                "แอบระแวงเบาๆ ขอเช็กความสะอาดและอุปกรณ์รอบตัวให้ชัวร์ก่อน",
+                "ตื่นเต้นและกลัวนิดๆ อยากให้มีคนช่วยพูดปลอบใจหรือจับมือ",
+                "สนใจอยากรู้ว่าหมอใช้เครื่องมือรุ่นไหน เทคโนโลยีอะไรอยู่"
+            ]
+        },
+        {
+            q: "ถ้าคุณจะทำฟัน (เช่น จัดฟัน หรือทำวีเนียร์) สิ่งที่คุณอยากรู้จากปากคุณหมอมากที่สุดคือ?",
+            o: [
+                "เบ็ดเสร็จราคาเท่าไหร่ ผ่อนยังไง และใช้เวลาเสร็จภายในกี่เดือน",
+                "ขั้นตอนการรักษา เอกสารรับรอง และมาตรฐานความปลอดภัย",
+                "ทำแล้วเจ็บไหม จะดูแลความรู้สึกเรายังไงระหว่างทำ",
+                "แผนการรักษาแบบ 3D หรือนวัตกรรมใหม่ล่าสุดที่มีอะไรบ้าง"
+            ]
+        },
+        {
+            q: "สมมุติว่าเกิดเหตุการณ์คิวหน้าเคาน์เตอร์ดีเลย์ไป 15 นาที คุณจะแสดงปฏิกิริยาอย่างไร?",
+            o: [
+                "เริ่มหงุดหงิด เพราะเรามีเวลาจำกัด อยากให้บริหารเวลาดีกว่านี้",
+                "นั่งรอเงียบๆ ตามระเบียบ แต่แอบเช็กในใจว่าเกิดจากระบบอะไร",
+                "ยิ้มแย้มเข้าใจ เดินไปคุยเล่นกับพี่ๆ หน้าเคาน์เตอร์แก้เซ็ง",
+                "ขอตัวเดินดูนวัตกรรมหรือเครื่องมือใหม่ๆ ที่ตั้งโชว์ในคลินิก"
+            ]
+        },
+        {
+            q: "ข้อความรีวิว (Review) แบบไหนที่จะทำให้คุณตัดสินใจจองคิวทันที?",
+            o: [
+                "บริการไวมาก ราคาคุ้มค่าสุดๆ จบไวในรอบเดียว",
+                "คลินิกสะอาดมาก เครื่องมือปลอดเชื้อ 100% หมอทำละเมียดละไม",
+                "ประทับใจมาก พี่ๆ ดูแลดีเหมือนครอบครัว คลายกังวลเรื่องกลัวหมอไปเลย",
+                "ใช้เทคโนโลยีสแกนฟัน 3D ล้ำมาก ไม่ต้องพิมพ์ปากแบบเดิมเลย ว้าวสุดๆ"
+            ]
+        }
+    ];
+
+    let currentQIndex = 0;
+    let userAnswers = [];
+    let currentShuffledMapping = [];
+    let userName = '';
+    let userPhone = '';
+
+    function shuffleArray(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function startQuiz() {
+        const nameInput = document.getElementById('user-name').value.trim();
+        const phoneInput = document.getElementById('user-phone').value.trim();
+        
+        if (!nameInput) {
+            alert('กรุณากรอกชื่อเล่นของคุณก่อนเริ่มครับ');
+            document.getElementById('user-name').focus();
+            return;
+        }
+        if (!phoneInput || phoneInput.length < 9) {
+            alert('กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้องสำหรับรับสิทธิ์ครับ');
+            document.getElementById('user-phone').focus();
+            return;
+        }
+
+        userName = nameInput;
+        userPhone = phoneInput;
+        currentQIndex = 0;
+        userAnswers = [];
+        
+        document.getElementById('welcome-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function shuffleOptionsWithMapping(options) {
+        let indices = [0, 1, 2, 3];
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        let shuffledText = [];
+        let mapping = [];
+        for (let i = 0; i < 4; i++) {
+            shuffledText.push(options[indices[i]]);
+            mapping.push(indices[i]);
+        }
+        return { text: shuffledText, map: mapping };
+    }
+
+    function loadQuestion() {
+        if (currentQIndex < patientQuestions.length) {
+            document.getElementById('quiz-title').innerText = `ข้อที่ ${currentQIndex + 1} / ${patientQuestions.length}`;
+            const percent = (currentQIndex / patientQuestions.length) * 100;
+            document.getElementById('progress-fill').style.width = percent + '%';
+
+            let currentQ = patientQuestions[currentQIndex];
+            const shuffled = shuffleOptionsWithMapping(currentQ.o);
+            currentShuffledMapping = shuffled.map;
+
+            let html = `
+                <p style="font-size:17px; font-weight:bold; color:var(--primary-color); line-height:1.5;">Q: ${currentQ.q}</p>
+                <div style="margin: 15px 0; display: flex; flex-direction: column;">`;
+            
+            shuffled.text.forEach((optText, idx) => {
+                html += `<label class="option-label">
+                    <input type="radio" name="q_opt" value="${idx}"> ${optText}
+                </label>`;
+            });
+            html += `</div>`;
+            document.getElementById('question-container').innerHTML = html;
+        } else {
+            document.getElementById('progress-fill').style.width = '100%';
+            setTimeout(showResult, 300);
+        }
+    }
+
+    function nextQuestion() {
+        const selected = document.querySelector('input[name="q_opt"]:checked');
+        if (!selected) {
+            alert('กรุณาเลือกคำตอบที่ตรงกับใจคุณที่สุดครับ');
+            return;
+        }
+        const uiIndex = parseInt(selected.value);
+        userAnswers.push(currentShuffledMapping[uiIndex]);
+        currentQIndex++;
+        loadQuestion();
+    }
+
+    function showResult() {
+        document.getElementById('quiz-section').classList.add('hidden');
+        document.getElementById('result-section').classList.remove('hidden');
+
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+
+        // คำนวณคะแนน 4 ขั้ว [0=กระทิง(Action), 1=หมี(Blueprint), 2=ช้าง(Nurturing), 3=อินทรี(Knowledge)]
+        let tally = [0, 0, 0, 0];
+        userAnswers.forEach(ans => tally[ans]++);
+
+        let maxVotes = -1, primaryIndex = -1;
+        for(let i=0; i<4; i++) {
+            if(tally[i] > maxVotes) { maxVotes = tally[i]; primaryIndex = i; }
+        }
+
+        let secondVotes = -1, secondaryIndex = -1;
+        for(let i=0; i<4; i++) {
+            if(i !== primaryIndex && tally[i] > secondVotes) { secondVotes = tally[i]; secondaryIndex = i; }
+        }
+
+        const rawNames = ["Bull", "Bear", "Mouse", "Eagle"];
+        const thaiAnimals = ["กระทิง (สายลุยไว สปีดชัดเจน)", "หมี (สายเป๊ะ ปลอดภัย ระเบียบ)", "ช้าง (สายละมุน อบอุ่น เป็นกันเอง)", "อินทรี (สายล้ำ นวัตกรรม ข้อมูลแน่น)"];
+        const simpleAnimalNames = ["กระทิง", "หมี", "ช้าง", "อินทรี"];
+        const bankCodes = ["A (Action)", "B (Blueprint)", "N (Nurturing)", "K (Knowledge)"];
+
+        let imageKey = rawNames[primaryIndex] + "_" + rawNames[secondaryIndex];
+        let selectedImgUrl = IMAGE_LINKS[imageKey] || "";
+        
+        if(selectedImgUrl === "") {
+            document.getElementById('hero-image').style.display = "none";
+        } else {
+            document.getElementById('hero-image').src = selectedImgUrl;
+            document.getElementById('hero-image').style.display = "inline-block";
+        }
+
+        document.getElementById('hero-title').innerText = `${userName} • ${simpleAnimalNames[primaryIndex]}สไตล์`;
+        document.getElementById('hero-sub').innerHTML = `คุณคือคนไข้ <b>${thaiAnimals[primaryIndex]}</b><br>โหมดเสริมคือ <b>${thaiAnimals[secondaryIndex]}</b>`;
+
+        const animalDescriptions = {
+            "Bull": "<b>กระทิง:</b> เป็นคนตัดสินใจเร็ว ชอบความชัดเจนและบริการที่รวดเร็วทันใจ ไม่อยากเสียเวลา",
+            "Bear": "<b>หมี:</b> ให้ความสำคัญกับความสะอาด ปลอดภัย มาตรฐาน และความถูกต้องละเอียดถี่ถ้วน",
+            "Mouse": "<b>ช้าง:</b> มองหาความอบอุ่น เป็นกันเอง ชอบการดูแลเอาใจใส่ และคำพูดที่จริงใจผ่อนคลาย",
+            "Eagle": "<b>อินทรี:</b> ชื่นชอบนวัตกรรม เทคโนโลยีล้ำสมัย และข้อมูลเหตุผลที่ชัดเจนน่าเชื่อถือ"
+        };
+
+        document.getElementById('score-text').innerHTML = `
+            <strong>✨ DNA รอยยิ้มของคุณ: ${simpleAnimalNames[primaryIndex]}</strong><br>
+            <p style="margin: 5px 0 10px 0; color: #444;">${animalDescriptions[rawNames[primaryIndex]]}</p>
+        `;
+
+        // 📤 ส่งข้อมูลลับเข้า Google Sheets ตัวใหม่
+        const payload = {
+            name: userName,
+            phone: userPhone,
+            department: "Patient_Quiz",
+            primaryAnimal: simpleAnimalNames[primaryIndex],
+            secondaryAnimal: simpleAnimalNames[secondaryIndex],
+            bankPrimaryCode: bankCodes[primaryIndex],
+            bankSecondaryCode: bankCodes[secondaryIndex],
+            scoreActionBull: tally[0],
+            scoreBlueprintBear: tally[1],
+            scoreNurturingMouse: tally[2],
+            scoreKnowledgeEagle: tally[3]
+        };
+
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).catch(() => {});
+    }
+</script>
+
+</body>
+</html>
